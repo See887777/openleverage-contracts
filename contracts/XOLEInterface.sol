@@ -161,7 +161,7 @@ interface XOLEInterface {
 
     function claimableTokenAmount() external view returns (uint256);
 
-    function convertToSharingToken(uint amount, uint minBuyAmount, bytes memory data) external;
+    //function convertToSharingToken(uint amount, uint minBuyAmount, bytes memory data) external;
 
     function withdrawDevFund() external;
 

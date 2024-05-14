@@ -134,54 +134,54 @@ contract XOLE is DelegateInterface, Adminable, XOLEInterface, XOLEStorage, Reent
     }
 
     /// @dev swap feeCollected to reward token
-    function convertToSharingToken(uint amount, uint minBuyAmount, bytes memory dexData) external override onlyAdminOrDeveloper() {
-        address fromToken;
-        address toToken;
-        // If no swapping, then assuming shareToken reward distribution
-        if (dexData.length == 0) {
-            fromToken = address(shareToken);
-        }
-        // Not shareToken
-        else {
-            if (dexData.isUniV2Class()) {
-                address[] memory path = dexData.toUniV2Path();
-                fromToken = path[0];
-                toToken = path[path.length - 1];
-            } else {
-                DexData.V3PoolData[] memory path = dexData.toUniV3Path();
-                fromToken = path[0].tokenA;
-                toToken = path[path.length - 1].tokenB;
-            }
-        }
-        // If fromToken is ole, check amount
-        if (fromToken == address(oleLpStakeToken)) {
-            require(oleLpStakeToken.balanceOf(address(this)).sub(totalLocked) >= amount, 'Exceed OLE balance');
-        }
-        uint newReward;
-        if (fromToken == address(shareToken)) {
-            uint toShare = shareableTokenAmountInternal();
-            require(toShare >= amount, 'Exceed share token balance');
-            newReward = amount;
-        }
-        else {
-            require(IERC20(fromToken).balanceOf(address(this)) >= amount, "Exceed available balance");
-            (IERC20(fromToken)).safeApprove(address(dexAgg), 0);
-            (IERC20(fromToken)).safeApprove(address(dexAgg), amount);
-            newReward = dexAgg.sellMul(amount, minBuyAmount, dexData);
-            require(newReward > 0, 'New reward is 0');
-        }
-        //fromToken or toToken equal shareToken ,update reward
-        if (fromToken == address(shareToken) || toToken == address(shareToken)) {
-            uint newDevFund = newReward.mul(devFundRatio).div(10000);
-            newReward = newReward.sub(newDevFund);
-            devFund = devFund.add(newDevFund);
-            totalRewarded = totalRewarded.add(newReward);
-            emit RewardAdded(fromToken, amount, newReward);
-        } else {
-            emit RewardConvert(fromToken, toToken, amount, newReward);
-        }
-
-    }
+//    function convertToSharingToken(uint amount, uint minBuyAmount, bytes memory dexData) external override onlyAdminOrDeveloper() {
+//        address fromToken;
+//        address toToken;
+//        // If no swapping, then assuming shareToken reward distribution
+//        if (dexData.length == 0) {
+//            fromToken = address(shareToken);
+//        }
+//        // Not shareToken
+//        else {
+//            if (dexData.isUniV2Class()) {
+//                address[] memory path = dexData.toUniV2Path();
+//                fromToken = path[0];
+//                toToken = path[path.length - 1];
+//            } else {
+//                DexData.V3PoolData[] memory path = dexData.toUniV3Path();
+//                fromToken = path[0].tokenA;
+//                toToken = path[path.length - 1].tokenB;
+//            }
+//        }
+//        // If fromToken is ole, check amount
+//        if (fromToken == address(oleLpStakeToken)) {
+//            require(oleLpStakeToken.balanceOf(address(this)).sub(totalLocked) >= amount, 'Exceed OLE balance');
+//        }
+//        uint newReward;
+//        if (fromToken == address(shareToken)) {
+//            uint toShare = shareableTokenAmountInternal();
+//            require(toShare >= amount, 'Exceed share token balance');
+//            newReward = amount;
+//        }
+//        else {
+//            require(IERC20(fromToken).balanceOf(address(this)) >= amount, "Exceed available balance");
+//            (IERC20(fromToken)).safeApprove(address(dexAgg), 0);
+//            (IERC20(fromToken)).safeApprove(address(dexAgg), amount);
+//            newReward = dexAgg.sellMul(amount, minBuyAmount, dexData);
+//            require(newReward > 0, 'New reward is 0');
+//        }
+//        //fromToken or toToken equal shareToken ,update reward
+//        if (fromToken == address(shareToken) || toToken == address(shareToken)) {
+//            uint newDevFund = newReward.mul(devFundRatio).div(10000);
+//            newReward = newReward.sub(newDevFund);
+//            devFund = devFund.add(newDevFund);
+//            totalRewarded = totalRewarded.add(newReward);
+//            emit RewardAdded(fromToken, amount, newReward);
+//        } else {
+//            emit RewardConvert(fromToken, toToken, amount, newReward);
+//        }
+//
+//    }
 
 
     function balanceOf(address addr) external view override returns (uint256){
